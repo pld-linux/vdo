@@ -1,0 +1,49 @@
+--- vdo-6.2.3.91/utils/uds/cpu.h.orig	2020-05-30 04:20:46.000000000 +0200
++++ vdo-6.2.3.91/utils/uds/cpu.h	2020-05-31 22:25:52.049798685 +0200
+@@ -36,7 +36,7 @@
+ #define CACHE_LINE_BYTES 128
+ #elif defined(__s390x__)
+ #define CACHE_LINE_BYTES 256
+-#elif defined(__x86_64__) || defined(__aarch64__)
++#elif defined(__x86_64__) || defined(__i386__) || defined(__aarch64__)
+ #define CACHE_LINE_BYTES  64
+ #else
+ #error "unknown cache line size"
+--- vdo-6.2.3.91/utils/uds/atomicDefs.h.orig	2020-05-30 04:20:46.000000000 +0200
++++ vdo-6.2.3.91/utils/uds/atomicDefs.h	2020-05-31 22:27:07.692722226 +0200
+@@ -81,7 +81,7 @@
+  **/
+ static INLINE void smp_mb(void)
+ {
+-#if defined __x86_64__
++#if defined __x86_64__ || defined __i386__
+   /*
+    * X86 full fence. Supposedly __sync_synchronize() will do this, but
+    * either the GCC documentation is a lie or GCC is broken.
+@@ -112,7 +112,7 @@
+  **/
+ static INLINE void smp_rmb(void)
+ {
+-#if defined __x86_64__
++#if defined __x86_64__ || defined __i386__
+   // XXX The implementation on x86 is more aggressive than necessary.
+   __asm__ __volatile__("lfence" : : : "memory");
+ #elif defined __aarch64__
+@@ -137,7 +137,7 @@
+  **/
+ static INLINE void smp_wmb(void)
+ {
+-#if defined __x86_64__
++#if defined __x86_64__ || defined __i386__
+   // XXX The implementation on x86 is more aggressive than necessary.
+   __asm__ __volatile__("sfence" : : : "memory");
+ #elif defined __aarch64__
+@@ -171,7 +171,7 @@
+  **/
+ static INLINE void smp_read_barrier_depends(void)
+ {
+-#if defined(__x86_64__) || defined(__PPC__) || defined(__s390__) \
++#if defined(__x86_64__) || defined(__i386__) || defined(__PPC__) || defined(__s390__) \
+   || defined(__aarch64__)
+   // Nothing needed for these architectures.
+ #else
