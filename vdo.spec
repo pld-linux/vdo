@@ -2,7 +2,7 @@ Summary:	Management tools for Virtual Data Optimizer
 Summary(pl.UTF-8):	Narzędzia do zarządzania podsystemem Virtual Data Optimizer
 Name:		vdo
 Version:	6.2.3.91
-Release:	1
+Release:	2
 License:	GPL v2
 Group:		Applications/System
 #Source0Download: https://github.com/dm-vdo/vdo/releases
