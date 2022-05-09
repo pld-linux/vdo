@@ -1,13 +1,13 @@
 Summary:	Management tools for Virtual Data Optimizer
 Summary(pl.UTF-8):	Narzędzia do zarządzania podsystemem Virtual Data Optimizer
 Name:		vdo
-Version:	6.2.3.114
+Version:	6.2.6.14
 Release:	1
 License:	GPL v2
 Group:		Applications/System
 #Source0Download: https://github.com/dm-vdo/vdo/releases
 Source0:	https://github.com/dm-vdo/vdo/archive/%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	9867ea5f6128d10acac1725f95b94d87
+# Source0-md5:	87b3e16edb83fc582f94c7a5fd208628
 Patch0:		%{name}-x86.patch
 Patch1:		%{name}-types.patch
 URL:		http://github.com/dm-vdo/vdo
@@ -16,6 +16,7 @@ BuildRequires:	libblkid-devel
 BuildRequires:	libuuid-devel >= 2.23
 BuildRequires:	python3 >= 1:3.6
 BuildRequires:	python3-devel >= 1:3.6
+BuildRequires:	sed >= 4.0
 BuildRequires:	valgrind
 BuildRequires:	zlib-devel
 Requires:	libuuid >= 2.23
@@ -76,6 +77,8 @@ VDO.
 %patch0 -p1
 %patch1 -p1
 
+%{__sed} -i -e "s,'/usr/libexec','%{_libexecdir}'," vdo-manager/vdomgmnt/Defaults.py
+
 %build
 %{__make} \
 	CC="%{__cc}" \
@@ -90,6 +93,7 @@ rm -rf $RPM_BUILD_ROOT
 	UDEVDIR=$RPM_BUILD_ROOT/lib/udev/rules.d \
 	bindir=%{_bindir} \
 	defaultdocdir=%{_docdir} \
+	libexecdir=%{_libexecdir} \
 	python3_sitelib=%{py3_sitescriptdir} \
 	mandir=%{_mandir} \
 	unitdir=%{systemdunitdir} \
@@ -124,6 +128,7 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_bindir}/vdoforcerebuild
 %attr(755,root,root) %{_bindir}/vdoformat
 %attr(755,root,root) %{_bindir}/vdosetuuid
+%attr(755,root,root) %{_libexecdir}/vdoprepareforlvm
 %{py3_sitescriptdir}/%{name}
 %{systemdunitdir}/vdo.service
 %{systemdunitdir}/vdo-start-by-dev@.service
@@ -135,6 +140,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vdodumpconfig.8*
 %{_mandir}/man8/vdoforcerebuild.8*
 %{_mandir}/man8/vdoformat.8*
+%{_mandir}/man8/vdoprepareforlvm.8*
 %{_mandir}/man8/vdosetuuid.8*
 
 %files -n bash-completion-vdo
@@ -144,6 +150,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files support
 %defattr(644,root,root,755)
+%attr(755,root,root) %{_bindir}/adaptLVMVDO.sh
 %attr(755,root,root) %{_bindir}/vdoaudit
 %attr(755,root,root) %{_bindir}/vdodebugmetadata
 %attr(755,root,root) %{_bindir}/vdodumpblockmap
@@ -151,6 +158,7 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_bindir}/vdolistmetadata
 %attr(755,root,root) %{_bindir}/vdoreadonly
 %attr(755,root,root) %{_bindir}/vdoregenerategeometry
+%{_mandir}/man8/adaptlvm.8*
 %{_mandir}/man8/vdoaudit.8*
 %{_mandir}/man8/vdodebugmetadata.8*
 %{_mandir}/man8/vdodumpblockmap.8*
