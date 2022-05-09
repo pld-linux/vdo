@@ -1,13 +1,13 @@
 Summary:	Management tools for Virtual Data Optimizer
 Summary(pl.UTF-8):	Narzędzia do zarządzania podsystemem Virtual Data Optimizer
 Name:		vdo
-Version:	6.2.3.91
-Release:	5
+Version:	6.2.3.114
+Release:	1
 License:	GPL v2
 Group:		Applications/System
 #Source0Download: https://github.com/dm-vdo/vdo/releases
 Source0:	https://github.com/dm-vdo/vdo/archive/%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	a4eeab4f23938683ef3c0d0bcd2e34ad
+# Source0-md5:	9867ea5f6128d10acac1725f95b94d87
 Patch0:		%{name}-x86.patch
 Patch1:		%{name}-types.patch
 URL:		http://github.com/dm-vdo/vdo
@@ -87,6 +87,7 @@ rm -rf $RPM_BUILD_ROOT
 %{__make} install \
 	DESTDIR=$RPM_BUILD_ROOT \
 	INSTALLOWNER= \
+	UDEVDIR=$RPM_BUILD_ROOT/lib/udev/rules.d \
 	bindir=%{_bindir} \
 	defaultdocdir=%{_docdir} \
 	python3_sitelib=%{py3_sitescriptdir} \
@@ -127,7 +128,7 @@ rm -rf $RPM_BUILD_ROOT
 %{systemdunitdir}/vdo.service
 %{systemdunitdir}/vdo-start-by-dev@.service
 /lib/systemd/system-preset/97-vdo.preset
-%{_sysconfdir}/udev/rules.d/69-vdo-start-by-dev.rules
+/lib/udev/rules.d/69-vdo-start-by-dev.rules
 %{_mandir}/man8/vdo.8*
 %{_mandir}/man8/vdostats.8*
 %{_mandir}/man8/vdodmeventd.8*
