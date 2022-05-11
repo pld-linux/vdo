@@ -1,6 +1,7 @@
 Summary:	Management tools for Virtual Data Optimizer
 Summary(pl.UTF-8):	Narzędzia do zarządzania podsystemem Virtual Data Optimizer
 Name:		vdo
+# keep 6.x for now for libblockdev compatibility (`vdo` utility); 8.x is prepared on DEVEL-8 branch
 Version:	6.2.6.14
 Release:	1
 License:	GPL v2
