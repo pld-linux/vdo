@@ -1,14 +1,13 @@
 Summary:	Management tools for Virtual Data Optimizer
 Summary(pl.UTF-8):	Narzędzia do zarządzania podsystemem Virtual Data Optimizer
 Name:		vdo
-# keep 6.x for now for libblockdev compatibility (`vdo` utility); 8.x is prepared on DEVEL-8 branch
-Version:	6.2.11.5
+Version:	8.1.1.360
 Release:	1
 License:	GPL v2
 Group:		Applications/System
 #Source0Download: https://github.com/dm-vdo/vdo/releases
 Source0:	https://github.com/dm-vdo/vdo/archive/%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	3ef212c34e6103d270735111b06aa5ff
+# Source0-md5:	b228f789ad7bcc645572129209934096
 Patch0:		%{name}-x86.patch
 Patch1:		%{name}-types.patch
 URL:		http://github.com/dm-vdo/vdo
@@ -81,8 +80,6 @@ VDO.
 %patch -P 0 -p1
 %patch -P 1 -p1
 
-%{__sed} -i -e "s,'/usr/libexec','%{_libexecdir}'," vdo-manager/vdomgmnt/Defaults.py
-
 %build
 %{__make} \
 	CC="%{__cc}" \
@@ -94,17 +91,10 @@ rm -rf $RPM_BUILD_ROOT
 %{__make} install \
 	DESTDIR=$RPM_BUILD_ROOT \
 	INSTALLOWNER= \
-	UDEVDIR=$RPM_BUILD_ROOT/lib/udev/rules.d \
 	bindir=%{_bindir} \
 	defaultdocdir=%{_docdir} \
-	libexecdir=%{_libexecdir} \
-	python3_sitelib=%{py3_sitescriptdir} \
 	mandir=%{_mandir} \
-	unitdir=%{systemdunitdir} \
 	sysconfdir=%{_sysconfdir}
-
-%py3_comp $RPM_BUILD_ROOT%{py3_sitescriptdir}
-%py3_ocomp $RPM_BUILD_ROOT%{py3_sitescriptdir}
 
 # packaged as %doc
 %{__rm} -r $RPM_BUILD_ROOT%{_docdir}/%{name}
@@ -124,32 +114,21 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(644,root,root,755)
 %doc CONTRIBUTORS.txt README.md examples/{ansible,monitor}
-%attr(755,root,root) %{_bindir}/vdo
-%attr(755,root,root) %{_bindir}/vdo-by-dev
-%attr(755,root,root) %{_bindir}/vdostats
 %attr(755,root,root) %{_bindir}/vdodmeventd
 %attr(755,root,root) %{_bindir}/vdodumpconfig
 %attr(755,root,root) %{_bindir}/vdoforcerebuild
 %attr(755,root,root) %{_bindir}/vdoformat
 %attr(755,root,root) %{_bindir}/vdosetuuid
-%attr(755,root,root) %{_libexecdir}/vdoprepareforlvm
-%{py3_sitescriptdir}/%{name}
-%{systemdunitdir}/vdo.service
-%{systemdunitdir}/vdo-start-by-dev@.service
-/lib/systemd/system-preset/97-vdo.preset
-/lib/udev/rules.d/69-vdo-start-by-dev.rules
-%{_mandir}/man8/vdo.8*
-%{_mandir}/man8/vdostats.8*
+%attr(755,root,root) %{_bindir}/vdostats
 %{_mandir}/man8/vdodmeventd.8*
 %{_mandir}/man8/vdodumpconfig.8*
 %{_mandir}/man8/vdoforcerebuild.8*
 %{_mandir}/man8/vdoformat.8*
-%{_mandir}/man8/vdoprepareforlvm.8*
 %{_mandir}/man8/vdosetuuid.8*
+%{_mandir}/man8/vdostats.8*
 
 %files -n bash-completion-vdo
 %defattr(644,root,root,755)
-/etc/bash_completion.d/vdo
 /etc/bash_completion.d/vdostats
 
 %files support

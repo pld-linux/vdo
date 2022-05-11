@@ -1,201 +1,86 @@
---- vdo-6.2.3.91/utils/uds/fileIORegion.c.orig	2020-05-30 04:20:46.000000000 +0200
-+++ vdo-6.2.3.91/utils/uds/fileIORegion.c	2020-06-01 06:23:23.271248367 +0200
-@@ -65,7 +65,7 @@
- 
-   if (offset + length > fior->size) {
-     return logErrorWithStringError(UDS_OUT_OF_RANGE,
--                                   "range %zd-%zd not in range 0 to %zu",
-+                                   "range %"PRId64"-%"PRId64" not in range 0 to %zu",
-                                    offset, offset + length, fior->size);
-   }
- 
---- vdo-6.2.3.91/utils/uds/indexLayout.c.orig	2020-05-30 04:20:46.000000000 +0200
-+++ vdo-6.2.3.91/utils/uds/indexLayout.c	2020-06-01 06:25:49.170457963 +0200
-@@ -955,7 +955,7 @@
-   }
-   if (iter.nextRegion != iter.lastRegion) {
-     return logErrorWithStringError(UDS_UNEXPECTED_RESULT,
--                                   "expected %ld additional regions",
-+                                   "expected %td additional regions",
-                                    iter.lastRegion - iter.nextRegion);
-   }
-   if (iter.nextBlock != isl->indexSave.startBlock + isl->indexSave.numBlocks) {
---- vdo-6.2.3.91/utils/uds/threadsLinuxUser.c.orig	2020-05-30 04:20:46.000000000 +0200
-+++ vdo-6.2.3.91/utils/uds/threadsLinuxUser.c	2020-06-01 06:28:58.816097231 +0200
-@@ -112,7 +112,7 @@
- int joinThreads(pthread_t th)
- {
-   int result = pthread_join(th, NULL);
--  return ASSERT_WITH_ERROR_CODE((result == 0), result, "th: %zu", th);
-+  return ASSERT_WITH_ERROR_CODE((result == 0), result, "th: %lu", th);
- }
- 
- /**********************************************************************/
---- vdo-6.2.3.91/utils/uds/timeUtils.c.orig	2020-05-30 04:20:46.000000000 +0200
-+++ vdo-6.2.3.91/utils/uds/timeUtils.c	2020-06-01 06:31:48.701843548 +0200
-@@ -69,7 +69,7 @@
-   if (!isValidTime(time)) {
-     return time;
-   }
--  if ((reltime >= 0) && (reltime < 10 * BILLION)) {
-+  if ((reltime >= 0) && (reltime < 10LL * BILLION)) {
-     reltime += time.tv_nsec;
-     while (reltime >= BILLION) {
-       reltime -= BILLION;
-@@ -80,7 +80,7 @@
-   }
-   // may not be accurate for times before the Epoch...
-   // (is the ns time positive or negative for negative time_t?)
--  int64_t ns = time.tv_sec * BILLION + time.tv_nsec;
-+  int64_t ns = (int64_t)time.tv_sec * BILLION + time.tv_nsec;
-   if ((ns < INT64_MIN / 2) ||
-       (ns > INT64_MAX / 2) ||
-       (reltime < INT64_MIN / 2) ||
-@@ -130,8 +130,8 @@
- RelTime timeDifference(AbsTime a, AbsTime b)
- {
-   if (isValidTime(a) && isValidTime(b)) {
--    int64_t ans = a.tv_sec * BILLION + a.tv_nsec;
--    int64_t bns = b.tv_sec * BILLION + b.tv_nsec;
-+    int64_t ans = (int64_t)a.tv_sec * BILLION + a.tv_nsec;
-+    int64_t bns = (int64_t)b.tv_sec * BILLION + b.tv_nsec;
-     return ans - bns;
-   } else if (isValidTime(a)) {
-     return INT64_MAX;
---- vdo-6.2.3.91/utils/vdo/user/fileLayer.c.orig	2020-05-30 04:20:46.000000000 +0200
-+++ vdo-6.2.3.91/utils/vdo/user/fileLayer.c	2020-06-01 07:08:45.456501024 +0200
-@@ -291,8 +291,8 @@
+--- vdo-8.1.1.360/utils/uds/indexLayout.c.orig	2022-05-10 20:18:46.864955066 +0200
++++ vdo-8.1.1.360/utils/uds/indexLayout.c	2022-05-10 20:25:11.562870979 +0200
+@@ -1086,7 +1086,7 @@ reconstruct_index_save(struct index_save
+ 	}
+ 	if (iter.next_region != iter.last_region) {
+ 		return uds_log_error_strerror(UDS_UNEXPECTED_RESULT,
+-					      "expected %ld additional regions",
++					      "expected %td additional regions",
+ 					      iter.last_region - iter.next_region);
+ 	}
+ 	if (iter.next_block !=
+--- vdo-8.1.1.360/utils/vdo/fileLayer.c.orig	2022-05-10 20:28:20.068516423 +0200
++++ vdo-8.1.1.360/utils/vdo/fileLayer.c	2022-05-10 20:28:23.371831860 +0200
+@@ -359,8 +359,8 @@ static int setupFileLayer(const char
      layer->blockCount = deviceBlocks;
    } else if (layer->blockCount != deviceBlocks) {
-     result = logErrorWithStringError(VDO_PARAMETER_MISMATCH,
--                                     "physical size %ld 4k blocks must match"
--                                     " physical size %ld 4k blocks of %s",
-+                                     "physical size %"PRId64" 4k blocks must match"
-+                                     " physical size %"PRId64" 4k blocks of %s",
-                                      layer->blockCount, deviceBlocks,
-                                      layer->name);
-     tryCloseFile(layer->fd);
---- vdo-6.2.3.91/utils/vdo/user/vdodebugmetadata.c.orig	2020-05-30 04:20:46.000000000 +0200
-+++ vdo-6.2.3.91/utils/vdo/user/vdodebugmetadata.c	2020-06-01 07:11:47.872179460 +0200
-@@ -320,7 +320,7 @@
-   result = layer->allocateIOBuffer(layer, journalBytes,
-                                    "recovery journal", &rawJournalBytes);
-   if (result != VDO_SUCCESS) {
--    errx(1, "Could not allocate %" PRIu64" bytes for the journal",
-+    errx(1, "Could not allocate %zu bytes for the journal",
-          journalBytes);
-   }
- 
-@@ -614,14 +614,14 @@
-   char *filename;
-   int result = ALLOCATE(MAX_PBNS, PhysicalBlockNumber, __func__, &pbns);
-   if (result != VDO_SUCCESS) {
--    errx(1, "Could not allocate %" PRIu64 " bytes",
-+    errx(1, "Could not allocate %zu bytes",
-          sizeof(PhysicalBlockNumber) * MAX_PBNS);
-   }
- 
-   result = ALLOCATE(MAX_SEARCH_LBNS, LogicalBlockNumber, __func__,
-                     &searchLBNs);
-   if (result != VDO_SUCCESS) {
--    errx(1, "Could not allocate %" PRIu64 " bytes",
-+    errx(1, "Could not allocate %zu bytes",
-          sizeof(LogicalBlockNumber) * MAX_SEARCH_LBNS);
-   }
- 
---- vdo-6.2.3.91/utils/vdo/user/vdodumpmetadata.c.orig	2020-05-30 04:20:46.000000000 +0200
-+++ vdo-6.2.3.91/utils/vdo/user/vdodumpmetadata.c	2020-06-01 07:12:18.685345864 +0200
-@@ -350,7 +350,7 @@
- {
-   int result = ALLOCATE(MAX_LBNS, PhysicalBlockNumber, __func__, &lbns);
-   if (result != VDO_SUCCESS) {
--    errx(1, "Could not allocate %" PRIu64 " bytes",
-+    errx(1, "Could not allocate %zu bytes",
-          sizeof(PhysicalBlockNumber) * MAX_LBNS);
-   }
- 
---- vdo-6.2.3.91/utils/vdo/user/vdolistmetadata.c.orig	2020-05-30 04:20:46.000000000 +0200
-+++ vdo-6.2.3.91/utils/vdo/user/vdolistmetadata.c	2020-06-01 07:12:54.471818659 +0200
-@@ -115,7 +115,7 @@
-                        PhysicalBlockNumber  startBlock,
-                        BlockCount           count)
+     result = uds_log_error_strerror(VDO_PARAMETER_MISMATCH,
+-                                    "physical size %ld 4k blocks must match"
+-                                    " physical size %ld 4k blocks of %s",
++                                    "physical size %"PRId64" 4k blocks must match"
++                                    " physical size %"PRId64" 4k blocks of %s",
+                                     layer->blockCount, deviceBlocks,
+                                     layer->name);
+     try_close_file(layer->fd);
+--- vdo-8.1.1.360/utils/vdo/vdolistmetadata.c.orig	2022-05-10 20:38:49.821771423 +0200
++++ vdo-8.1.1.360/utils/vdo/vdolistmetadata.c	2022-05-10 20:38:54.738411454 +0200
+@@ -116,7 +116,7 @@ static void listBlocks(const char
+                        physical_block_number_t  startBlock,
+                        block_count_t            count)
  {
 -  printf("%ld .. %ld: %s\n", startBlock, startBlock + count - 1, label);
 +  printf("%"PRId64" .. %"PRId64": %s\n", startBlock, startBlock + count - 1, label);
  }
  
  /**********************************************************************/
---- vdo-6.2.3.91/utils/vdo/user/vdoregenerategeometry.c.orig	2020-05-30 04:20:46.000000000 +0200
-+++ vdo-6.2.3.91/utils/vdo/user/vdoregenerategeometry.c	2020-06-01 07:14:56.551157299 +0200
-@@ -89,7 +89,7 @@
+--- vdo-8.1.1.360/utils/vdo/vdoregenerategeometry.c.orig	2022-05-10 20:40:40.487838560 +0200
++++ vdo-8.1.1.360/utils/vdo/vdoregenerategeometry.c	2022-05-10 20:40:43.144490835 +0200
+@@ -89,7 +89,7 @@ static Candidate      candidates[UDS_CON
  static int            candidateCount = 0;
  
  static char   *fileName = NULL;
 -static size_t  offset   = 0;
-+static uint64_t  offset = 0;
++static uint64_t offset  = 0;
  
  /**
   * Explain how this command-line tool is used.
---- vdo-6.2.9.7/utils/vdo/user/vdoprepareforlvm.c.orig	2023-06-28 22:40:33.647062144 +0200
-+++ vdo-6.2.9.7/utils/vdo/user/vdoprepareforlvm.c	2023-06-28 23:11:27.319708420 +0200
-@@ -22,6 +22,7 @@
- #include <err.h>
- #include <fcntl.h>
- #include <getopt.h>
-+#include <inttypes.h>
- #include <linux/fs.h>
- #include <stdio.h>
- #include <stdlib.h>
-@@ -248,7 +249,7 @@
-   udsConfigurationSetNonce(udsConfig, geometry.nonce);
+--- vdo-8.1.1.360/utils/vdo/messageStatsReader.c.orig	2022-02-12 21:47:10.000000000 +0100
++++ vdo-8.1.1.360/utils/vdo/messageStatsReader.c	2022-05-10 21:07:02.595934211 +0200
+@@ -37,7 +37,7 @@ static int skip_string(char **buf, char
+ static int read_uint64_t(char **buf,
+ 			 uint64_t *value)
+ {
+-	int count = sscanf(*buf, "%lu, ", value);
++	int count = sscanf(*buf, "%"PRIu64", ", value);
+ 	if (count != 1) {
+ 		return VDO_UNEXPECTED_EOF;
+ 	}
+@@ -59,7 +59,7 @@ static int read_uint32_t(char **buf,
+ static int read_block_count_t(char **buf,
+ 			      block_count_t *value)
+ {
+-	int count = sscanf(*buf, "%lu, ", value);
++	int count = sscanf(*buf, "%"PRIu64", ", value);
+ 	if (count != 1) {
+ 		return VDO_UNEXPECTED_EOF;
+ 	}
+--- vdo-8.1.1.360/utils/vdo/vdoStatsWriter.c.orig	2022-02-12 21:47:10.000000000 +0100
++++ vdo-8.1.1.360/utils/vdo/vdoStatsWriter.c	2022-05-10 21:10:54.824676120 +0200
+@@ -60,7 +60,7 @@ static int write_block_count_t(char *lab
  
-   off_t offset = geometry.regions[INDEX_REGION].startBlock * VDO_BLOCK_SIZE;
--  result = asprintf(&indexName, "%s offset=%ld", fileName, offset);
-+  result = asprintf(&indexName, "%s offset=%"PRId64, fileName, (int64_t)offset);
-   if (result == -1) {
-     udsFreeConfiguration(udsConfig);
-     return ENOMEM;
-@@ -673,7 +673,7 @@ static int performDeviceConversion(off_t
-     lvmExtentSize = VDO_BLOCK_SIZE;
-   }
+ 	maxLabelLength = max(maxLabelLength, (int) strlen(label));
  
--  printf("New geometry block offset calculated at %lu\n",
-+  printf("New geometry block offset calculated at %"PRIu64"\n",
-          newBlockOffset * VDO_BLOCK_SIZE);
+-	count = sprintf(values[fieldCount++], "%lu", value);
++	count = sprintf(values[fieldCount++], "%"PRIu64, value);
+ 	if (count < 0) {
+ 		return VDO_UNEXPECTED_EOF;
+ 	}
+@@ -77,7 +77,7 @@ static int write_uint64_t(char *label, u
  
-   // If its not a dry run, convert the VDO device
-@@ -706,9 +707,9 @@
-   cleanup(vdo, layer);
-   close(fd);
+ 	maxLabelLength = max(maxLabelLength, (int) strlen(label));
  
--  printf("Conversion completed for '%s': VDO is now aligned on %ld bytes,"
--         " starting at offset %lu\n",
--         fileName, lvmExtentSize, newBlockOffset * VDO_BLOCK_SIZE);
-+  printf("Conversion completed for '%s': VDO is now aligned on %lu bytes,"
-+         " starting at offset %"PRId64"\n",
-+         fileName, lvmExtentSize, (int64_t)(newBlockOffset * VDO_BLOCK_SIZE));
- 
-   return 0;
- }
-@@ -846,7 +846,7 @@ static int repairDeviceConversion(off_t
-          fileName, stringError(result, errBuf, ERRBUF_SIZE));
-   }
- 
--  printf("New geometry block offset calculated at %lu\n",
-+  printf("New geometry block offset calculated at %"PRIu64"\n",
-          newBlockOffset * VDO_BLOCK_SIZE);
- 
-   // If there is a change in location and its not a dry run
-@@ -888,9 +889,9 @@
-   cleanup(vdo, layer);
-   close(fd);
- 
--  printf("Conversion completed for '%s': VDO is now aligned on %ld bytes,"
--         " starting at offset %lu\n",
--         fileName, lvmExtentSize, newBlockOffset * VDO_BLOCK_SIZE);
-+  printf("Conversion completed for '%s': VDO is now aligned on %lu bytes,"
-+         " starting at offset %"PRId64"\n",
-+         fileName, lvmExtentSize, (int64_t)(newBlockOffset * VDO_BLOCK_SIZE));
- 
-   return 0;
- }
+-	count = sprintf(values[fieldCount++], "%lu", value);
++	count = sprintf(values[fieldCount++], "%"PRIu64, value);
+ 	if (count < 0) {
+ 		return VDO_UNEXPECTED_EOF;
+ 	}
