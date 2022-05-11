@@ -1,17 +1,17 @@
---- vdo-6.2.3.91/utils/uds/cpu.h.orig	2020-05-30 04:20:46.000000000 +0200
-+++ vdo-6.2.3.91/utils/uds/cpu.h	2020-05-31 22:25:52.049798685 +0200
+--- vdo-8.1.1.360/utils/uds/cpu.h.orig	2022-05-10 09:00:13.892182837 +0200
++++ vdo-8.1.1.360/utils/uds/cpu.h	2022-05-10 20:17:03.618847732 +0200
 @@ -36,7 +36,7 @@
  #define CACHE_LINE_BYTES 128
  #elif defined(__s390x__)
  #define CACHE_LINE_BYTES 256
 -#elif defined(__x86_64__) || defined(__aarch64__)
 +#elif defined(__x86_64__) || defined(__i386__) || defined(__aarch64__)
- #define CACHE_LINE_BYTES  64
+ #define CACHE_LINE_BYTES 64
  #else
  #error "unknown cache line size"
---- vdo-6.2.3.91/utils/uds/atomicDefs.h.orig	2020-05-30 04:20:46.000000000 +0200
-+++ vdo-6.2.3.91/utils/uds/atomicDefs.h	2020-05-31 22:27:07.692722226 +0200
-@@ -81,7 +81,7 @@
+--- vdo-8.1.1.360/utils/uds/atomicDefs.h.orig	2022-02-12 21:47:10.000000000 +0100
++++ vdo-8.1.1.360/utils/uds/atomicDefs.h	2022-05-10 20:17:51.798586720 +0200
+@@ -82,7 +82,7 @@ static INLINE void barrier(void)
   **/
  static INLINE void smp_mb(void)
  {
@@ -20,7 +20,7 @@
    /*
     * X86 full fence. Supposedly __sync_synchronize() will do this, but
     * either the GCC documentation is a lie or GCC is broken.
-@@ -112,7 +112,7 @@
+@@ -113,7 +113,7 @@ static INLINE void smp_mb(void)
   **/
  static INLINE void smp_rmb(void)
  {
@@ -29,7 +29,7 @@
    // XXX The implementation on x86 is more aggressive than necessary.
    __asm__ __volatile__("lfence" : : : "memory");
  #elif defined __aarch64__
-@@ -137,7 +137,7 @@
+@@ -138,7 +138,7 @@ static INLINE void smp_rmb(void)
   **/
  static INLINE void smp_wmb(void)
  {
@@ -38,12 +38,21 @@
    // XXX The implementation on x86 is more aggressive than necessary.
    __asm__ __volatile__("sfence" : : : "memory");
  #elif defined __aarch64__
-@@ -171,7 +171,7 @@
+@@ -158,7 +158,7 @@ static INLINE void smp_wmb(void)
   **/
- static INLINE void smp_read_barrier_depends(void)
+ static INLINE void smp_mb__before_atomic(void)
  {
--#if defined(__x86_64__) || defined(__PPC__) || defined(__s390__) \
-+#if defined(__x86_64__) || defined(__i386__) || defined(__PPC__) || defined(__s390__) \
-   || defined(__aarch64__)
-   // Nothing needed for these architectures.
+-#if defined(__x86_64__) || defined(__s390__)
++#if defined(__x86_64__) || defined(__i386__) || defined(__s390__)
+   // Atomic operations are already serializing on x86 and s390
+   barrier();
+ #else
+@@ -172,7 +172,7 @@ static INLINE void smp_mb__before_atomic
+  **/
+ static INLINE void smp_mb__after_atomic(void)
+ {
+-#if defined(__x86_64__) || defined(__s390__)
++#if defined(__x86_64__) || defined(__i386__) || defined(__s390__)
+   // Atomic operations are already serializing on x86 and s390
+   barrier();
  #else
