@@ -136,33 +136,48 @@
  
  /**
   * Explain how this command-line tool is used.
---- vdo-6.2.6.14/utils/vdo/user/vdoprepareforlvm.c.orig	2022-02-11 01:31:42.000000000 +0100
-+++ vdo-6.2.6.14/utils/vdo/user/vdoprepareforlvm.c	2022-05-09 21:50:35.553180915 +0200
+--- vdo-6.2.9.7/utils/vdo/user/vdoprepareforlvm.c.orig	2023-06-28 22:40:33.647062144 +0200
++++ vdo-6.2.9.7/utils/vdo/user/vdoprepareforlvm.c	2023-06-28 23:11:27.319708420 +0200
 @@ -22,6 +22,7 @@
  #include <err.h>
  #include <fcntl.h>
  #include <getopt.h>
 +#include <inttypes.h>
+ #include <linux/fs.h>
  #include <stdio.h>
  #include <stdlib.h>
- #include <unistd.h>
-@@ -200,7 +201,7 @@ static int convertUDS(IndexConfig    *in
+@@ -248,7 +249,7 @@
    udsConfigurationSetNonce(udsConfig, geometry.nonce);
  
-   off_t startByte = geometry.regions[INDEX_REGION].startBlock * VDO_BLOCK_SIZE;
--  result = asprintf(&indexName, "%s offset=%ld", fileName, startByte);
-+  result = asprintf(&indexName, "%s offset=%"PRId64, fileName, (uint64_t)startByte);
+   off_t offset = geometry.regions[INDEX_REGION].startBlock * VDO_BLOCK_SIZE;
+-  result = asprintf(&indexName, "%s offset=%ld", fileName, offset);
++  result = asprintf(&indexName, "%s offset=%"PRId64, fileName, (int64_t)offset);
    if (result == -1) {
      udsFreeConfiguration(udsConfig);
      return ENOMEM;
-@@ -510,8 +511,8 @@ static int performDeviceConversion(void)
+@@ -706,9 +707,9 @@
    cleanup(vdo, layer);
    close(fd);
  
--  printf("Conversion completed for '%s': VDO is now offset by %ld bytes\n",
--         fileName, vdoByteOffset);
-+  printf("Conversion completed for '%s': VDO is now offset by %"PRId64" bytes\n",
-+         fileName, (uint64_t)vdoByteOffset);
+-  printf("Conversion completed for '%s': VDO is now aligned on %ld bytes,"
+-         " starting at offset %lu\n",
+-         fileName, lvmExtentSize, newBlockOffset * VDO_BLOCK_SIZE);
++  printf("Conversion completed for '%s': VDO is now aligned on %lu bytes,"
++         " starting at offset %"PRId64"\n",
++         fileName, lvmExtentSize, (int64_t)(newBlockOffset * VDO_BLOCK_SIZE));
+ 
+   return result;
+ }
+@@ -888,9 +889,9 @@
+   cleanup(vdo, layer);
+   close(fd);
+ 
+-  printf("Conversion completed for '%s': VDO is now aligned on %ld bytes,"
+-         " starting at offset %lu\n",
+-         fileName, lvmExtentSize, newBlockOffset * VDO_BLOCK_SIZE);
++  printf("Conversion completed for '%s': VDO is now aligned on %lu bytes,"
++         " starting at offset %"PRId64"\n",
++         fileName, lvmExtentSize, (int64_t)(newBlockOffset * VDO_BLOCK_SIZE));
  
    return result;
  }
