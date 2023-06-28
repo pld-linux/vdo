@@ -17,6 +17,7 @@ BuildRequires:	libblkid-devel
 BuildRequires:	libuuid-devel >= 2.23
 BuildRequires:	python3 >= 1:3.6
 BuildRequires:	python3-devel >= 1:3.6
+BuildRequires:	rpm-build >= 4.6
 BuildRequires:	sed >= 4.0
 BuildRequires:	valgrind
 BuildRequires:	zlib-devel
@@ -47,6 +48,7 @@ Summary(pl.UTF-8):	Bashowe uzupełnianie parametrów poleceń do zarządzania VD
 Group:		Applications/Shells
 Requires:	%{name} = %{version}-%{release}
 Requires:	bash-completion
+BuildArch:	noarch
 
 %description -n bash-completion-vdo
 Bash completion for VDO management commands.
