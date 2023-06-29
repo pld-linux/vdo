@@ -155,6 +155,15 @@
    if (result == -1) {
      udsFreeConfiguration(udsConfig);
      return ENOMEM;
+@@ -673,7 +673,7 @@ static int performDeviceConversion(off_t
+     lvmExtentSize = VDO_BLOCK_SIZE;
+   }
+ 
+-  printf("New geometry block offset calculated at %lu\n",
++  printf("New geometry block offset calculated at %"PRIu64"\n",
+          newBlockOffset * VDO_BLOCK_SIZE);
+ 
+   // If its not a dry run, convert the VDO device
 @@ -706,9 +707,9 @@
    cleanup(vdo, layer);
    close(fd);
@@ -168,6 +177,15 @@
  
    return result;
  }
+@@ -846,7 +846,7 @@ static int repairDeviceConversion(off_t
+          fileName, stringError(result, errBuf, ERRBUF_SIZE));
+   }
+ 
+-  printf("New geometry block offset calculated at %lu\n",
++  printf("New geometry block offset calculated at %"PRIu64"\n",
+          newBlockOffset * VDO_BLOCK_SIZE);
+ 
+   // If there is a change in location and its not a dry run
 @@ -888,9 +889,9 @@
    cleanup(vdo, layer);
    close(fd);
