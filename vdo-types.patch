@@ -1,16 +1,32 @@
---- vdo-8.1.1.360/utils/uds/indexLayout.c.orig	2022-05-10 20:18:46.864955066 +0200
-+++ vdo-8.1.1.360/utils/uds/indexLayout.c	2022-05-10 20:25:11.562870979 +0200
-@@ -1086,7 +1086,7 @@ reconstruct_index_save(struct index_save
+--- vdo-8.2.2.2/utils/uds/index-layout.c.orig	2023-06-20 23:21:16.000000000 +0200
++++ vdo-8.2.2.2/utils/uds/index-layout.c	2023-09-18 18:22:26.458891054 +0200
+@@ -1990,9 +1990,9 @@ static int create_layout_factory(struct
+ 	writable_size = get_uds_writable_size(factory) & -UDS_BLOCK_SIZE;
+ 	if (writable_size < config->size + config->offset) {
+ 		put_uds_io_factory(factory);
+-		uds_log_error("index storage (%zu) is smaller than the requested size %zu",
++		uds_log_error("index storage (%zu) is smaller than the requested size %"PRIu64,
+ 			      writable_size,
+-			      config->size + config->offset);
++			      (uint64_t)(config->size + config->offset));
+ 		return -ENOSPC;
  	}
- 	if (iter.next_region != iter.last_region) {
- 		return uds_log_error_strerror(UDS_UNEXPECTED_RESULT,
--					      "expected %ld additional regions",
-+					      "expected %td additional regions",
- 					      iter.last_region - iter.next_region);
- 	}
- 	if (iter.next_block !=
---- vdo-8.1.1.360/utils/vdo/fileLayer.c.orig	2022-05-10 20:28:20.068516423 +0200
-+++ vdo-8.1.1.360/utils/vdo/fileLayer.c	2022-05-10 20:28:23.371831860 +0200
+ 
+--- vdo-8.2.2.2/utils/vdo/fileLayer.c.orig	2023-09-18 18:22:44.048795761 +0200
++++ vdo-8.2.2.2/utils/vdo/fileLayer.c	2023-09-18 18:26:50.834125477 +0200
+@@ -138,10 +138,10 @@ static int performIO(FileLayer
+       if (n == 0) {
+         errno = VDO_UNEXPECTED_EOF;
+       }
+-      return uds_log_error_strerror(errno, "p%s %s @%zd",
++      return uds_log_error_strerror(errno, "p%s %s @%"PRId64,
+                                     (read ? "read" : "write"),
+                                     layer->name,
+-                                    offset);
++                                    (int64_t)offset);
+     }
+ 
+     offset += n;
 @@ -359,8 +359,8 @@ static int setupFileLayer(const char
      layer->blockCount = deviceBlocks;
    } else if (layer->blockCount != deviceBlocks) {

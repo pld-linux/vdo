@@ -1,13 +1,13 @@
 Summary:	Management tools for Virtual Data Optimizer
 Summary(pl.UTF-8):	Narzędzia do zarządzania podsystemem Virtual Data Optimizer
 Name:		vdo
-Version:	8.1.1.360
+Version:	8.2.2.2
 Release:	1
 License:	GPL v2
 Group:		Applications/System
 #Source0Download: https://github.com/dm-vdo/vdo/releases
 Source0:	https://github.com/dm-vdo/vdo/archive/%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	b228f789ad7bcc645572129209934096
+# Source0-md5:	36464435c234af7b92c3d02bd76e3d15
 Patch0:		%{name}-x86.patch
 Patch1:		%{name}-types.patch
 URL:		http://github.com/dm-vdo/vdo
@@ -113,7 +113,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(644,root,root,755)
-%doc CONTRIBUTORS.txt README.md examples/{ansible,monitor}
+%doc CONTRIBUTORS.txt README.md examples/monitor
 %attr(755,root,root) %{_bindir}/vdodmeventd
 %attr(755,root,root) %{_bindir}/vdodumpconfig
 %attr(755,root,root) %{_bindir}/vdoforcerebuild
@@ -140,6 +140,7 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_bindir}/vdodumpmetadata
 %attr(755,root,root) %{_bindir}/vdolistmetadata
 %attr(755,root,root) %{_bindir}/vdoreadonly
+%attr(755,root,root) %{_bindir}/vdorecover
 %attr(755,root,root) %{_bindir}/vdoregenerategeometry
 %{_mandir}/man8/adaptlvm.8*
 %{_mandir}/man8/vdoaudit.8*
@@ -148,4 +149,5 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vdodumpmetadata.8*
 %{_mandir}/man8/vdolistmetadata.8*
 %{_mandir}/man8/vdoreadonly.8*
+%{_mandir}/man8/vdorecover.8*
 %{_mandir}/man8/vdoregenerategeometry.8*
