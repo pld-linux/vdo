@@ -3,7 +3,7 @@ Summary(pl.UTF-8):	Narzędzia do zarządzania podsystemem Virtual Data Optimizer
 Name:		vdo
 # keep 6.x for now for libblockdev compatibility (`vdo` utility); 8.x is prepared on DEVEL-8 branch
 Version:	6.2.9.7
-Release:	
+Release:	2
 License:	GPL v2
 Group:		Applications/System
 #Source0Download: https://github.com/dm-vdo/vdo/releases
@@ -78,8 +78,8 @@ VDO.
 
 %prep
 %setup -q
-%patch0 -p1
-%patch1 -p1
+%patch -P 0 -p1
+%patch -P 1 -p1
 
 %{__sed} -i -e "s,'/usr/libexec','%{_libexecdir}'," vdo-manager/vdomgmnt/Defaults.py
 
