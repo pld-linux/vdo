@@ -175,7 +175,7 @@
 +         " starting at offset %"PRId64"\n",
 +         fileName, lvmExtentSize, (int64_t)(newBlockOffset * VDO_BLOCK_SIZE));
  
-   return result;
+   return 0;
  }
 @@ -846,7 +846,7 @@ static int repairDeviceConversion(off_t
           fileName, stringError(result, errBuf, ERRBUF_SIZE));
@@ -197,5 +197,5 @@
 +         " starting at offset %"PRId64"\n",
 +         fileName, lvmExtentSize, (int64_t)(newBlockOffset * VDO_BLOCK_SIZE));
  
-   return result;
+   return 0;
  }
