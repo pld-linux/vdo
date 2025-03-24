@@ -1,13 +1,13 @@
 Summary:	Management tools for Virtual Data Optimizer
 Summary(pl.UTF-8):	Narzędzia do zarządzania podsystemem Virtual Data Optimizer
 Name:		vdo
-Version:	8.2.2.2
+Version:	8.3.1.1
 Release:	1
 License:	GPL v2
 Group:		Applications/System
 #Source0Download: https://github.com/dm-vdo/vdo/releases
 Source0:	https://github.com/dm-vdo/vdo/archive/%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	36464435c234af7b92c3d02bd76e3d15
+# Source0-md5:	8b1e872be780ef530285710f9a25983f
 Patch0:		%{name}-x86.patch
 Patch1:		%{name}-types.patch
 URL:		http://github.com/dm-vdo/vdo
@@ -18,6 +18,7 @@ BuildRequires:	python3 >= 1:3.6
 BuildRequires:	python3-devel >= 1:3.6
 BuildRequires:	python3-modules >= 1:3.6
 BuildRequires:	rpm-build >= 4.6
+BuildRequires:	rpmbuild(macros) >= 1.673
 BuildRequires:	sed >= 4.0
 BuildRequires:	valgrind
 BuildRequires:	zlib-devel
@@ -114,26 +115,20 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(644,root,root,755)
 %doc CONTRIBUTORS.txt README.md examples/monitor
-%attr(755,root,root) %{_bindir}/vdodmeventd
-%attr(755,root,root) %{_bindir}/vdodumpconfig
 %attr(755,root,root) %{_bindir}/vdoforcerebuild
 %attr(755,root,root) %{_bindir}/vdoformat
-%attr(755,root,root) %{_bindir}/vdosetuuid
 %attr(755,root,root) %{_bindir}/vdostats
-%{_mandir}/man8/vdodmeventd.8*
-%{_mandir}/man8/vdodumpconfig.8*
 %{_mandir}/man8/vdoforcerebuild.8*
 %{_mandir}/man8/vdoformat.8*
-%{_mandir}/man8/vdosetuuid.8*
 %{_mandir}/man8/vdostats.8*
 
 %files -n bash-completion-vdo
 %defattr(644,root,root,755)
-/etc/bash_completion.d/vdostats
+%{bash_compdir}/vdostats
 
 %files support
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_bindir}/adaptLVMVDO.sh
+%attr(755,root,root) %{_bindir}/adaptlvm
 %attr(755,root,root) %{_bindir}/vdoaudit
 %attr(755,root,root) %{_bindir}/vdodebugmetadata
 %attr(755,root,root) %{_bindir}/vdodumpblockmap
@@ -141,7 +136,6 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_bindir}/vdolistmetadata
 %attr(755,root,root) %{_bindir}/vdoreadonly
 %attr(755,root,root) %{_bindir}/vdorecover
-%attr(755,root,root) %{_bindir}/vdoregenerategeometry
 %{_mandir}/man8/adaptlvm.8*
 %{_mandir}/man8/vdoaudit.8*
 %{_mandir}/man8/vdodebugmetadata.8*
@@ -150,4 +144,3 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vdolistmetadata.8*
 %{_mandir}/man8/vdoreadonly.8*
 %{_mandir}/man8/vdorecover.8*
-%{_mandir}/man8/vdoregenerategeometry.8*

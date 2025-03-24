@@ -1,25 +1,24 @@
---- vdo-8.2.2.2/utils/uds/index-layout.c.orig	2023-06-20 23:21:16.000000000 +0200
-+++ vdo-8.2.2.2/utils/uds/index-layout.c	2023-09-18 18:22:26.458891054 +0200
-@@ -1990,9 +1990,9 @@ static int create_layout_factory(struct
- 	writable_size = get_uds_writable_size(factory) & -UDS_BLOCK_SIZE;
+--- vdo-8.3.1.1/utils/uds/index-layout.c.orig	2025-03-24 20:09:36.313475431 +0100
++++ vdo-8.3.1.1/utils/uds/index-layout.c	2025-03-24 20:11:07.179649833 +0100
+@@ -1676,8 +1676,8 @@ static int create_layout_factory(struct
+ 	writable_size = uds_get_writable_size(factory) & -UDS_BLOCK_SIZE;
  	if (writable_size < config->size + config->offset) {
- 		put_uds_io_factory(factory);
--		uds_log_error("index storage (%zu) is smaller than the requested size %zu",
-+		uds_log_error("index storage (%zu) is smaller than the requested size %"PRIu64,
- 			      writable_size,
--			      config->size + config->offset);
-+			      (uint64_t)(config->size + config->offset));
+ 		uds_put_io_factory(factory);
+-		vdo_log_error("index storage (%zu) is smaller than the requested size %zu",
+-			      writable_size, config->size + config->offset);
++		vdo_log_error("index storage (%zu) is smaller than the requested size %" PRIu64,
++			      writable_size, (uint64_t)(config->size + config->offset));
  		return -ENOSPC;
  	}
  
---- vdo-8.2.2.2/utils/vdo/fileLayer.c.orig	2023-09-18 18:22:44.048795761 +0200
-+++ vdo-8.2.2.2/utils/vdo/fileLayer.c	2023-09-18 18:26:50.834125477 +0200
+--- vdo-8.3.1.1/utils/vdo/fileLayer.c.orig	2025-03-24 20:09:36.313475431 +0100
++++ vdo-8.3.1.1/utils/vdo/fileLayer.c	2025-03-24 20:12:11.632633994 +0100
 @@ -138,10 +138,10 @@ static int performIO(FileLayer
        if (n == 0) {
          errno = VDO_UNEXPECTED_EOF;
        }
--      return uds_log_error_strerror(errno, "p%s %s @%zd",
-+      return uds_log_error_strerror(errno, "p%s %s @%"PRId64,
+-      return vdo_log_error_strerror(errno, "p%s %s @%zd",
++      return vdo_log_error_strerror(errno, "p%s %s @%" PRId64,
                                      (read ? "read" : "write"),
                                      layer->name,
 -                                    offset);
@@ -27,14 +26,14 @@
      }
  
      offset += n;
-@@ -359,8 +359,8 @@ static int setupFileLayer(const char
+@@ -354,8 +354,8 @@ static int setupFileLayer(const char
      layer->blockCount = deviceBlocks;
    } else if (layer->blockCount != deviceBlocks) {
-     result = uds_log_error_strerror(VDO_PARAMETER_MISMATCH,
+     result = vdo_log_error_strerror(VDO_PARAMETER_MISMATCH,
 -                                    "physical size %ld 4k blocks must match"
 -                                    " physical size %ld 4k blocks of %s",
-+                                    "physical size %"PRId64" 4k blocks must match"
-+                                    " physical size %"PRId64" 4k blocks of %s",
++                                    "physical size %" PRId64 " 4k blocks must match"
++                                    " physical size %" PRId64 " 4k blocks of %s",
                                      layer->blockCount, deviceBlocks,
                                      layer->name);
      try_close_file(layer->fd);
@@ -49,29 +48,18 @@
  }
  
  /**********************************************************************/
---- vdo-8.1.1.360/utils/vdo/vdoregenerategeometry.c.orig	2022-05-10 20:40:40.487838560 +0200
-+++ vdo-8.1.1.360/utils/vdo/vdoregenerategeometry.c	2022-05-10 20:40:43.144490835 +0200
-@@ -89,7 +89,7 @@ static Candidate      candidates[UDS_CON
- static int            candidateCount = 0;
- 
- static char   *fileName = NULL;
--static size_t  offset   = 0;
-+static uint64_t offset  = 0;
- 
- /**
-  * Explain how this command-line tool is used.
---- vdo-8.1.1.360/utils/vdo/messageStatsReader.c.orig	2022-02-12 21:47:10.000000000 +0100
-+++ vdo-8.1.1.360/utils/vdo/messageStatsReader.c	2022-05-10 21:07:02.595934211 +0200
-@@ -37,7 +37,7 @@ static int skip_string(char **buf, char
- static int read_uint64_t(char **buf,
- 			 uint64_t *value)
+--- vdo-8.3.1.1/utils/vdo/messageStatsReader.c.orig	2025-03-14 01:17:27.000000000 +0100
++++ vdo-8.3.1.1/utils/vdo/messageStatsReader.c	2025-03-24 20:13:32.682194911 +0100
+@@ -23,7 +23,7 @@ static int skip_string(char **buf, char
+ static int read_u64(char **buf,
+ 		    u64 *value)
  {
 -	int count = sscanf(*buf, "%lu, ", value);
-+	int count = sscanf(*buf, "%"PRIu64", ", value);
++	int count = sscanf(*buf, "%" PRIu64 ", ", value);
  	if (count != 1) {
  		return VDO_UNEXPECTED_EOF;
  	}
-@@ -59,7 +59,7 @@ static int read_uint32_t(char **buf,
+@@ -43,7 +43,7 @@ static int read_u32(char **buf,
  static int read_block_count_t(char **buf,
  			      block_count_t *value)
  {
@@ -99,4 +87,24 @@
 +	count = sprintf(values[fieldCount++], "%"PRIu64, value);
  	if (count < 0) {
  		return VDO_UNEXPECTED_EOF;
+ 	}
+--- vdo-8.3.1.1/utils/uds/dm-bufio.c.orig	2025-03-14 01:17:27.000000000 +0100
++++ vdo-8.3.1.1/utils/uds/dm-bufio.c	2025-03-24 21:26:41.018421254 +0100
+@@ -140,7 +140,7 @@ void *dm_bufio_read(struct dm_bufio_clie
+ 	data = dm_bufio_new(client, block, &buffer);
+ 	if (IS_ERR(data)) {
+ 		vdo_log_error_strerror(-PTR_ERR(data),
+-				       "error reading physical page %lu",
++				       "error reading physical page %" PRIu64,
+ 				       block);
+ 		return data;
+ 	}
+@@ -153,7 +153,7 @@ void *dm_bufio_read(struct dm_bufio_clie
+ 	if (result != UDS_SUCCESS) {
+ 		dm_bufio_release(buffer);
+ 		vdo_log_warning_strerror(result,
+-					 "error reading physical page %lu",
++					 "error reading physical page %" PRIu64,
+ 					 block);
+ 		return ERR_PTR(-EIO);
  	}
